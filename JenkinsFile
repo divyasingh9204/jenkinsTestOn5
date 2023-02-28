@@ -32,12 +32,9 @@ pipeline {
        
        stage('Pre-Prod') {
 		steps {
-                    //sonarSummaries()
-		    script{
-		       sh '${SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectKey=sunilyerubandi_DemoMavenProject -Dsonar.organization=sunilyerubandi -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=8f73ecadbe478e324214c741569315dddfa01ee5 -Dsonar.java.binaries=target/ -Dsonar.branch.name=master'
-		    }
-                    snDevOpsArtifact(artifactsPayload: """{"artifacts": [{"name": "${artifactname}", "version": "1.${env.BUILD_NUMBER}","semanticVersion": "1.${env.BUILD_NUMBER}.0","repositoryName": "${repoName}"}],"branchName":"main"}""")
-                    snDevOpsPackage(name: "${packageName}", artifactsPayload: """{"artifacts":[{"name": "${artifactname}", "version": "1.${env.BUILD_NUMBER}","semanticVersion": "1.${env.BUILD_NUMBER}.0","repositoryName": "${repoName}"}], "branchName":"main"}""")
+                    sonarSummaries()
+                    snDevOpsArtifact(artifactsPayload: """{"artifacts": [{"name": "${artifactname}", "version": "1.${env.BUILD_NUMBER}","semanticVersion": "1.${env.BUILD_NUMBER}.0","repositoryName": "${repoName}"}],"branchName":"${env.BRANCH_NAME}"}""")
+                    snDevOpsPackage(name: "${packageName}", artifactsPayload: """{"artifacts":[{"name": "${artifactname}", "version": "1.${env.BUILD_NUMBER}","semanticVersion": "1.${env.BUILD_NUMBER}.0","repositoryName": "${repoName}"}], "branchName":"${env.BRANCH_NAME}"}""")
             }       
        }
       stage('Deploy') {
@@ -48,6 +45,8 @@ pipeline {
                 {
                     "setCloseCode": false,
                     "pollingInterval":"10",
+		    "changeCreationTimeOut":"30",
+                    "abortOnChangeCreationFailure": true,
                     "attributes": {
                         "requested_by": {
                         "name": "DevOps System"
@@ -60,24 +59,30 @@ pipeline {
                         "end_date": "2022-01-08 11:59:59"
                      }
                 }""")
-
                  }
       }
-
+stage('PostDeploy') {
+           steps {
+              echo 'post deploy'
+           }
+        
+       }
+       
  }
  
 }
 
 def sonarSummaries() {
 
-   //withSonarQubeEnv('Sonar_Cloud') {
-       //sh '${SCANNER_HOME}/bin/sonar-scanner -Dproject.settings=${SCANNER_HOME}/conf/qa-sonar-scanner-cloud.properties'
-       
+  // withSonarQubeEnv('SonarCloud') {
+   	//sh '${SCANNER_HOME}/bin/sonar-scanner -Dproject.settings=${SCANNER_HOME}/conf/qa-sonar-scanner.properties'
+        //sh '${SCANNER_HOME}/bin/sonar-scanner -Dproject.settings=${SCANNER_HOME}/conf/qa-sonar-scanner-cloud.properties'
 	//}
 	
-    //withSonarQubeEnv('sonarQube_local') {
-      // 	sh '${SCANNER_HOME}/bin/sonar-scanner -Dproject.settings=${SCANNER_HOME}/conf/qa-sonar-scanner.properties'
+    withSonarQubeEnv('sonarQube_local') {
+       	sh '${SCANNER_HOME}/bin/sonar-scanner -Dproject.settings=${SCANNER_HOME}/conf/qa-sonar-scanner.properties'
    		// sh '${SCANNER_HOME}/bin/sonar-scanner -Dproject.settings=${SCANNER_HOME}/conf/sonar-scanner.properties'
-	//}
+	}
 	
 } // end of def sonarsummaries
+
