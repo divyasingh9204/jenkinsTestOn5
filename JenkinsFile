@@ -32,10 +32,8 @@ pipeline {
        
        stage('Pre-Prod') {
 		steps {
-                    //sonarSummaries()
-		   // script{
-		    //   sh '${SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectKey=balu-sn-devops_First_repo -Dsonar.host.url=http://sonarqube1.sndevops.xyz -Dsonar.login=30f0e92137da4cd055a4a46d440f92f30f74d990 -Dsonar.java.binaries=target/ -Dsonar.branch.name=master'
-		   // }
+                    sonarSummaries()
+
                     snDevOpsArtifact(artifactsPayload: """{"artifacts": [{"name": "${artifactname}", "version": "1.${env.BUILD_NUMBER}","semanticVersion": "1.${env.BUILD_NUMBER}.0","repositoryName": "${repoName}"}],"branchName":"${env.BRANCH_NAME}"}""")
                     snDevOpsPackage(name: "${packageName}", artifactsPayload: """{"artifacts":[{"name": "${artifactname}", "version": "1.${env.BUILD_NUMBER}","semanticVersion": "1.${env.BUILD_NUMBER}.0","repositoryName": "${repoName}"}], "branchName":"${env.BRANCH_NAME}"}""")
             }       
@@ -68,15 +66,15 @@ stage('PostDeploy') {
 
 def sonarSummaries() {
 
-   //withSonarQubeEnv('Sonar_Cloud') {
-       //sh '${SCANNER_HOME}/bin/sonar-scanner -Dproject.settings=${SCANNER_HOME}/conf/qa-sonar-scanner-cloud.properties'
-       
+  // withSonarQubeEnv('SonarCloud') {
+   	//sh '${SCANNER_HOME}/bin/sonar-scanner -Dproject.settings=${SCANNER_HOME}/conf/qa-sonar-scanner.properties'
+        //sh '${SCANNER_HOME}/bin/sonar-scanner -Dproject.settings=${SCANNER_HOME}/conf/qa-sonar-scanner-cloud.properties'
 	//}
 	
-    //withSonarQubeEnv('sonarQube_local') {
-      // 	sh '${SCANNER_HOME}/bin/sonar-scanner -Dproject.settings=${SCANNER_HOME}/conf/qa-sonar-scanner.properties'
+    withSonarQubeEnv('sonarQube_local') {
+       	sh '${SCANNER_HOME}/bin/sonar-scanner -Dproject.settings=${SCANNER_HOME}/conf/qa-sonar-scanner.properties'
    		// sh '${SCANNER_HOME}/bin/sonar-scanner -Dproject.settings=${SCANNER_HOME}/conf/sonar-scanner.properties'
-	//}
+	}
 	
 } // end of def sonarsummaries
 
